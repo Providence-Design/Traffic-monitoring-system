@@ -5,29 +5,34 @@ import os
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    return render_template('home.html')
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
 
-@app.route('/selectrec', methods=['GET'])
-def select_record():
+def select_records():
+    rows = []
     try:
         with lite.connect('traffic.db') as con:
+            con.row_factory = dict_factory
             cur = con.cursor()
-            cur.execute('SELECT * FROM data') 
-            con.commit()
-        
-        msg = (datetime.now().strftime('%Y-%m-%d %H:%M:%S')) 
-        
-        for row in cur: 
-           msg = msg + '\n' + str(row[0])  + '\t\t'  + str(row[1]) + '\t\t' +  str(row[2])
-
-    except:
+            cur.execute('SELECT * FROM data')
+            rows = cur.fetchall()
+    except lite.Error as error:
         con.rollback()
-        msg = 'error occured'
+        print(error.args[0])
+        return False
     finally:
         con.close()
-        return msg
+        return rows
+
+
+@app.route('/')
+def index():
+    data = select_records()
+    return render_template('home.html', data = data)
+
 
 @app.route('/addrec', methods=['POST'])
 def add_record():
@@ -43,8 +48,6 @@ def add_record():
 
             con.commit()
             msg = (datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + ' Record successfully added!'
-        
-        
     except:
         con.rollback()
         msg = 'error occured'

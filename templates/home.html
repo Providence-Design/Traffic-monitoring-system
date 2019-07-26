@@ -38,6 +38,29 @@
         </div>
     </section>
 
+    <div class="container">
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Timestamp</th>
+                    <th>Speed (km/s)</th>
+                    <th>Camera</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <th><img src="{{ row.image }}" alt="{{ row.image }}"></th>
+                    <td>{{ row.time_stamp }}</td>
+                    <td>{{ row.speed }}</td>
+                    <td>{{ row.camera_id }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     <footer id="mainfooter">
         <p>This page is directly protected by the 2019 Copyright. All Rights Reserved. </p>
     </footer>
