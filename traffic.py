@@ -1,9 +1,11 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, flash
 import sqlite3 as lite
 from datetime import datetime
+from config import credential
 import os
 
 app = Flask(__name__)
+app.config['SECRET_KEY']='8ac7f84d2b39bffc88d30b3616069d'
 
 def dict_factory(cursor, row):
     d = {}
@@ -29,9 +31,28 @@ def select_records():
 
 
 @app.route('/')
+def login():
+    return render_template('login.html')
+
+
+@app.route("/login", methods = ['GET', 'POST'])
+@app.route("/index", methods=["GET", "POST"])
 def index():
+    print("landing page running...")
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # credentials from config files imported
+        if username == credential['username'] and password == credential['password']:
+            flash('Login successful :)', 'success')
+            # flash("You have successfully logged in.", 'success')    # python Toastr uses flash to flash pages
+            return render_template('index.html')
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'error')
+
     data = select_records()
-    return render_template('home.html', data = data)
+    return render_template('index.html', data = data)
 
 
 @app.route('/addrec', methods=['POST'])
